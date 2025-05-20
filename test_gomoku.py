@@ -1,5 +1,4 @@
 from typing import Optional
-import pytest
 from gomoku import Gomoku
 
 def convert_go_ban(board: str) -> list[list[int]]:
@@ -136,7 +135,7 @@ def test_detect_vertical_win_bottom_right_corner():
 .⬤.............
 """
     assert_code_and_message(str, 1, 12, 8, Gomoku.WIN, "Player 1 wins (vertical alignment)")
-    
+
 def test_detect_diagonal_win_bottom_left_corner():
     str = """\
 ...............
@@ -156,7 +155,7 @@ def test_detect_diagonal_win_bottom_left_corner():
 ...............
 """
     assert_code_and_message(str, 13, 14, 8, Gomoku.WIN, "Player 1 wins (diagonal alignment)")
-    
+
 def test_detect_anti_diagonal_win_bottom_left_corner():
     str = """\
 ...............
