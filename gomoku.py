@@ -7,7 +7,7 @@ class Gomoku:
     INVALID_MOVE = 1
     WIN = 2
 
-    def __init__(self, size):
+    def __init__(self, size: int):
         if (size < 5):
             raise ValueError("Size must be at least 5")
         if ((size % 2) == 0):
@@ -23,18 +23,26 @@ class Gomoku:
         # 1 -> black stone
         # -1 -> white stone
 
+        # check board size
         assert len(board) == self.size
         for line in board:
             assert len(line) == self.size
 
+        # check geneneration value
+        assert generation == self.size * self.size - sum(row.count(0) for row in board)
+
+        # check bumber of stones for each player
+        assert 0 <= (sum(row.count(1) for row in board) - sum(row.count(-1) for row in board))  <= 1
+
+        # record data
         self.board = board
         self.generation = generation
 
     def manage_move(self, x: int, y: int) -> tuple[int, Optional[str]]:
         # manage a move
         # return a tuple (code, message)
-        # code is an integer
-        # message is a string
+        # - code is an (integer) status code
+        # - message is a (string) explanation massage
 
         if (x < 0) or (x >= self.size) or (y < 0) or (y >= self.size):
             return self.INVALID_MOVE, "Move out of the go ban"
