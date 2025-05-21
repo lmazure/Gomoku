@@ -3,13 +3,17 @@ from typing import Optional
 
 class Gomoku:
 
-    size = 15
     VALID_MOVE = 0
     INVALID_MOVE = 1
     WIN = 2
 
-    def __init__(self):
-        self.board = [[0 for _ in range(self.size)] for _ in range(self.size)]
+    def __init__(self, size):
+        if (size < 5):
+            raise ValueError("Size must be at least 5")
+        if ((size % 2) == 0):
+            raise ValueError("Size must be odd")
+        self.board = [[0 for _ in range(size)] for _ in range(size)]
+        self.size = size
         self.generation = 0
 
     def set(self, board: list[list[int]], generation: int):

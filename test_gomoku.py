@@ -11,7 +11,7 @@ def convert_go_ban(board: str) -> list[list[int]]:
 
 
 def assert_code_and_message(board: str, x: int, y: int, generation: int, expected_code: int, expected_message: Optional[str]):
-    gomoku = Gomoku()
+    gomoku = Gomoku(15)
     gomoku.set(convert_go_ban(board), generation)
     assert gomoku.manage_move(x, y) == (expected_code, expected_message)
 
