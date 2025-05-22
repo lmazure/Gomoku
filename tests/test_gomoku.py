@@ -56,7 +56,7 @@ def test_illegal_first_move():
 """
     assert_code_and_message(str, 0, 0, 0, Gomoku.INVALID_MOVE, "First move must be in the center")
 
-def test_moveout_of_go_ban():
+def test_move_out_of_go_ban():
     str = """\
 ...............
 ...............
