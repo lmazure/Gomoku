@@ -10,10 +10,15 @@ def convert_go_ban(board: str) -> list[list[int]]:
     return [list(i) for i in zip(*tempo)]
 
 
-def assert_code_and_message(board: str, x: int, y: int, generation: int, expected_code: int, expected_message: Optional[str]):
+def assert_code_and_message(board: str, x: int, y: int, turn_number: int, expected_status: int, expected_message: Optional[str]):
     gomoku = Gomoku(15)
-    gomoku.set(convert_go_ban(board), generation)
-    assert gomoku.manage_move(x, y) == (expected_code, expected_message)
+    gomoku.set(convert_go_ban(board), turn_number)
+    result = gomoku.manage_move(x, y)
+    assert result['status'] == expected_status
+    assert result['message'] == expected_message
+    assert len(result['stone_changes']['added']) == 1
+    assert result['stone_changes']['added'][0] == (x, y)
+    assert len(result['stone_changes']['removed']) == 0
 
 def test_legal_first_move():
     str = """\

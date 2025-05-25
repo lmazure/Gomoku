@@ -1,5 +1,5 @@
-from typing import Optional
-
+import copy
+from typing import Dict
 
 class Gomoku:
 
@@ -14,9 +14,17 @@ class Gomoku:
             raise ValueError("Size must be odd")
         self.board = [[0 for _ in range(size)] for _ in range(size)]
         self.size = size
-        self.generation = 0
+        self.turn_number = 0
 
-    def set(self, board: list[list[int]], generation: int):
+    def clone(self) -> 'Gomoku':
+        # return a clone of the board
+
+        other = self.__class__(self.size)
+        other.board = copy.deepcopy(self.board)
+        other.turn_number = self.turn_number
+        return other
+
+    def set(self, board: list[list[int]], turn_number: int):
         # set the board to a given state
         # board is a 2D array of size 15x15
         # 0 -> empty cell
@@ -29,34 +37,37 @@ class Gomoku:
             assert len(line) == self.size
 
         # check geneneration value
-        assert generation == self.size * self.size - sum(row.count(0) for row in board)
+        assert turn_number == self.size * self.size - sum(row.count(0) for row in board)
 
         # check bumber of stones for each player
         assert 0 <= (sum(row.count(1) for row in board) - sum(row.count(-1) for row in board))  <= 1
 
         # record data
         self.board = board
-        self.generation = generation
+        self.turn_number = turn_number
 
-    def manage_move(self, x: int, y: int) -> tuple[int, Optional[str]]:
-        # manage a move
-        # return a tuple (code, message)
+    def manage_move(self, x: int, y: int) -> Dict:
+        # manage a move at position (x, y)
+        # return a dict (code, message, stone_changes)
         # - code is an (integer) status code
         # - message is a (string) explanation massage
+        # - stone_changes is a dict
+        #    - added is the list of (int, int) tuples
+        #    - removed is the list of (int, int) tuples
 
         if (x < 0) or (x >= self.size) or (y < 0) or (y >= self.size):
-            return self.INVALID_MOVE, "Move out of the go ban"
+            return  { "status" : self.INVALID_MOVE, "message" : "Move out of the go ban", "stone_changes" : { "added" : [ (x, y)], "removed" : [] } }
 
-        if (self.generation == 0):
+        if (self.turn_number == 0):
             if (x != ((self.size-1)/2)) or (y != ((self.size-1)/2)):
-                return self.INVALID_MOVE, "First move must be in the center"
+                return { "status" : self.INVALID_MOVE, "message" : "First move must be in the center", "stone_changes" : { "added" : [ (x, y)], "removed" : [] } }
         else:
             if (self.board[x][y] != 0):
-                return self.INVALID_MOVE, "Move on an already played cell"
+                return { "status" : self.INVALID_MOVE, "message" : "Move on an already played cell", "stone_changes" : { "added" : [ (x, y)], "removed" : [] } }
 
-        stone_owner = 1 - 2 * (self.generation % 2)
+        stone_owner = 1 - 2 * (self.turn_number % 2)
         self.board[x][y] = stone_owner
-        self.generation += 1
+        self.turn_number += 1
 
         x_range_before = 0
         for i in range(-1, -5, -1):
@@ -78,7 +89,7 @@ class Gomoku:
                 break
 
         if (x_range_before + x_range_after) >= 4:
-            return self.WIN, "Player " + str(stone_owner) + " wins (horizontal alignment)"
+            return { "status" : self.WIN, "message" : "Player " + str(stone_owner) + " wins (horizontal alignment)", "stone_changes" : { "added" : [ (x, y)], "removed" : [] } }
 
         y_range_before = 0
         for i in range(-1, -5, -1):
@@ -99,7 +110,7 @@ class Gomoku:
                 break
 
         if (y_range_before + y_range_after) >= 4:
-            return self.WIN, "Player " + str(stone_owner) + " wins (vertical alignment)"
+            return { "status" : self.WIN, "message" : "Player " + str(stone_owner) + " wins (vertical alignment)", "stone_changes" : { "added" : [ (x, y)], "removed" : [] } }
 
         xy_range_before = 0
         for i in range(-1, -5, -1):
@@ -123,7 +134,7 @@ class Gomoku:
         print(f"xy_range_after: {xy_range_after}")
 
         if (xy_range_before + xy_range_after) >= 4:
-            return self.WIN, "Player " + str(stone_owner) + " wins (diagonal alignment)"
+            return { "status" : self.WIN, "message" : "Player " + str(stone_owner) + " wins (diagonal alignment)", "stone_changes" : { "added" : [ (x, y)], "removed" : [] } }
 
         yx_range_before = 0
         for i in range(-1, -5, -1):
@@ -144,6 +155,6 @@ class Gomoku:
                 break
 
         if (yx_range_before + yx_range_after) >= 4:
-            return self.WIN, "Player " + str(stone_owner) + " wins (anti-diagonal alignment)"
+            return { "status" : self.WIN, "message" : "Player " + str(stone_owner) + " wins (anti-diagonal alignment)", "stone_changes" : { "added" : [ (x, y)], "removed" : [] } }
 
-        return self.VALID_MOVE, None
+        return { "status" : self.VALID_MOVE, "message" : None, "stone_changes" : { "added" : [ (x, y)], "removed" : [] } }
