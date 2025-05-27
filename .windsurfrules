@@ -1,1 +1,2 @@
-1) Unit tests must be written in the tests folder and must be run with pytest
+1) The shell is Git Bash
+2) Unit tests must be written in the tests folder and must be run with pytest

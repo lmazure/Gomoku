@@ -15,6 +15,8 @@ class Gomoku:
         self.board = [[0 for _ in range(size)] for _ in range(size)]
         self.size = size
         self.turn_number = 0
+        self.black_takes = 0
+        self.white_takes = 0
 
     def clone(self) -> 'Gomoku':
         # return a clone of the board
@@ -22,9 +24,11 @@ class Gomoku:
         other = self.__class__(self.size)
         other.board = copy.deepcopy(self.board)
         other.turn_number = self.turn_number
+        other.black_takes = self.black_takes
+        other.white_takes = self.white_takes
         return other
 
-    def set(self, board: list[list[int]], turn_number: int):
+    def set(self, board: list[list[int]], black_takes: int, white_takes: int, turn_number: int):
         # set the board to a given state
         # board is a 2D array of size 15x15
         # 0 -> empty cell
@@ -36,39 +40,106 @@ class Gomoku:
         for line in board:
             assert len(line) == self.size
 
-        # check geneneration value
-        assert turn_number == self.size * self.size - sum(row.count(0) for row in board)
-
-        # check bumber of stones for each player
-        assert 0 <= (sum(row.count(1) for row in board) - sum(row.count(-1) for row in board))  <= 1
+        # check number of stones for each player
+        assert ((turn_number + 1) // 2) == sum(row.count(1) for row in board) + 2 * white_takes
+        assert (turn_number // 2) == sum(row.count(-1) for row in board) + 2 * black_takes
 
         # record data
         self.board = board
         self.turn_number = turn_number
+        self.black_takes = black_takes
+        self.white_takes = white_takes
 
     def manage_move(self, x: int, y: int) -> Dict:
         # manage a move at position (x, y)
         # return a dict (code, message, stone_changes)
         # - code is an (integer) status code
         # - message is a (string) explanation massage
-        # - stone_removed is the list of (int, int) tuples
+        # - removed_stones is a list of (int, int) tuples
+
+        removed_stones = []
 
         if (x < 0) or (x >= self.size) or (y < 0) or (y >= self.size):
-            return  { "status" : self.INVALID_MOVE, "message" : "Move out of the go ban", "stone_removed" : [] }
+            return  { "status" : self.INVALID_MOVE, "message" : "Move out of the go ban", "removed_stones" : removed_stones }
 
         if (self.turn_number == 0):
             if (x != ((self.size-1)/2)) or (y != ((self.size-1)/2)):
-                return { "status" : self.INVALID_MOVE, "message" : "First move must be in the center", "stone_removed" : [] }
+                return { "status" : self.INVALID_MOVE, "message" : "First move must be in the center", "removed_stones" : removed_stones }
         elif (self.turn_number == 2):
             if (x >= ((self.size-5)/2)) and (y >= ((self.size-5)/2)) and (x <= ((self.size+5)/2)) and (y <= ((self.size+5)/2)):
-                return { "status" : self.INVALID_MOVE, "message" : "Third move must be out of central 5×5 square", "stone_removed" : [] }
+                return { "status" : self.INVALID_MOVE, "message" : "Third move must be out of central 5×5 square", "removed_stones" : removed_stones }
         else:
             if (self.board[x][y] != 0):
-                return { "status" : self.INVALID_MOVE, "message" : "Move on an already played cell", "stone_removed" : [] }
+                return { "status" : self.INVALID_MOVE, "message" : "Move on an already played cell", "removed_stones" : removed_stones }
 
         stone_owner = 1 - 2 * (self.turn_number % 2)
         self.board[x][y] = stone_owner
         self.turn_number += 1
+
+        if (x >= 3):
+            if (self.board[x-3][y] == stone_owner) and (self.board[x-2][y] == -stone_owner) and (self.board[x-1][y] == -stone_owner):
+                removed_stones.append((x-2, y))
+                removed_stones.append((x-1, y))
+                self.board[x-2][y] = 0
+                self.board[x-1][y] = 0
+
+        if (x >= 3) and (y >= 3):
+            if (self.board[x-3][y-3] == stone_owner) and (self.board[x-2][y-2] == -stone_owner) and (self.board[x-1][y-1] == -stone_owner):
+                removed_stones.append((x-2, y-2))
+                removed_stones.append((x-1, y-1))
+                self.board[x-2][y-2] = 0
+                self.board[x-1][y-1] = 0
+
+        if (y >= 3):
+            if (self.board[x][y-3] == stone_owner) and (self.board[x][y-2] == -stone_owner) and (self.board[x][y-1] == -stone_owner):
+                removed_stones.append((x, y-2))
+                removed_stones.append((x, y-1))
+                self.board[x][y-2] = 0
+                self.board[x][y-1] = 0
+
+        if (x < self.size-3) and (y >= 3):
+            if (self.board[x+3][y-3] == stone_owner) and (self.board[x+2][y-2] == -stone_owner) and (self.board[x+1][y-1] == -stone_owner):
+                removed_stones.append((x+2, y-2))
+                removed_stones.append((x+1, y-1))
+                self.board[x+2][y-2] = 0
+                self.board[x+1][y-1] = 0
+
+        if (x < self.size-3):
+            if (self.board[x+3][y] == stone_owner) and (self.board[x+2][y] == -stone_owner) and (self.board[x+1][y] == -stone_owner):
+                removed_stones.append((x+2, y))
+                removed_stones.append((x+1, y))
+                self.board[x+2][y] = 0
+                self.board[x+1][y] = 0
+
+        if (x < self.size-3) and (y < self.size-3):
+            if (self.board[x+3][y+3] == stone_owner) and (self.board[x+2][y+2] == -stone_owner) and (self.board[x+1][y+1] == -stone_owner):
+                removed_stones.append((x+2, y+2))
+                removed_stones.append((x+1, y+1))
+                self.board[x+2][y+2] = 0
+                self.board[x+1][y+1] = 0
+
+        if (y < self.size-3):
+            if (self.board[x][y+3] == stone_owner) and (self.board[x][y+2] == -stone_owner) and (self.board[x][y+1] == -stone_owner):
+                removed_stones.append((x, y+2))
+                removed_stones.append((x, y+1))
+                self.board[x][y+2] = 0
+                self.board[x][y+1] = 0
+
+        if (x >= 3) and (y < self.size-3):
+            if (self.board[x-3][y+3] == stone_owner) and (self.board[x-2][y+2] == -stone_owner) and (self.board[x-1][y+1] == -stone_owner):
+                removed_stones.append((x-2, y+2))
+                removed_stones.append((x-1, y+1))
+                self.board[x-2][y+2] = 0
+                self.board[x-1][y+1] = 0
+
+        if (stone_owner == 1):
+            self.black_takes += len(removed_stones) / 2
+            if (self.black_takes >= 5):
+                return { "status" : self.WIN, "message" : "Player 1 wins (5 takes)", "removed_stones" : removed_stones }
+        else:
+            self.white_takes += len(removed_stones) / 2
+            if (self.white_takes >= 5):
+                return { "status" : self.WIN, "message" : "Player 2 wins (5 takes)", "removed_stones" : removed_stones }
 
         x_range_before = 0
         for i in range(-1, -5, -1):
@@ -89,7 +160,7 @@ class Gomoku:
                 break
 
         if (x_range_before + x_range_after) >= 4:
-            return { "status" : self.WIN, "message" : "Player " + str(stone_owner) + " wins (horizontal alignment)", "stone_removed" : [] }
+            return { "status" : self.WIN, "message" : "Player " + str(stone_owner) + " wins (horizontal alignment)", "removed_stones" : removed_stones }
 
         y_range_before = 0
         for i in range(-1, -5, -1):
@@ -110,7 +181,7 @@ class Gomoku:
                 break
 
         if (y_range_before + y_range_after) >= 4:
-            return { "status" : self.WIN, "message" : "Player " + str(stone_owner) + " wins (vertical alignment)", "stone_removed" : [] }
+            return { "status" : self.WIN, "message" : "Player " + str(stone_owner) + " wins (vertical alignment)", "removed_stones" : removed_stones }
 
         xy_range_before = 0
         for i in range(-1, -5, -1):
@@ -131,7 +202,7 @@ class Gomoku:
                 break
 
         if (xy_range_before + xy_range_after) >= 4:
-            return { "status" : self.WIN, "message" : "Player " + str(stone_owner) + " wins (diagonal alignment)", "stone_removed" : [] }
+            return { "status" : self.WIN, "message" : "Player " + str(stone_owner) + " wins (diagonal alignment)", "removed_stones" : removed_stones }
 
         yx_range_before = 0
         for i in range(-1, -5, -1):
@@ -152,6 +223,6 @@ class Gomoku:
                 break
 
         if (yx_range_before + yx_range_after) >= 4:
-            return { "status" : self.WIN, "message" : "Player " + str(stone_owner) + " wins (anti-diagonal alignment)", "stone_removed" : [] }
+            return { "status" : self.WIN, "message" : "Player " + str(stone_owner) + " wins (anti-diagonal alignment)", "removed_stones" : removed_stones }
 
-        return { "status" : self.VALID_MOVE, "message" : None, "stone_removed" : [] }
+        return { "status" : self.VALID_MOVE, "message" : None, "removed_stones" : removed_stones }

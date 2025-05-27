@@ -10,13 +10,13 @@ def convert_go_ban(board: str) -> list[list[int]]:
     return [list(i) for i in zip(*tempo)]
 
 
-def assert_code_and_message(board: str, x: int, y: int, turn_number: int, expected_status: int, expected_message: Optional[str]):
+def assert_code_and_message(board: str, x: int, y: int, black_takes: int, white_takes: int, turn_number: int, expected_status: int, expected_message: Optional[str]):
     gomoku = Gomoku(15)
-    gomoku.set(convert_go_ban(board), turn_number)
+    gomoku.set(convert_go_ban(board), black_takes, white_takes, turn_number)
     result = gomoku.manage_move(x, y)
     assert result['status'] == expected_status
     assert result['message'] == expected_message
-    assert len(result['stone_removed']) == 0
+    assert len(result['removed_stones']) == 0
 
 def test_legal_first_move():
     str = """\
@@ -36,7 +36,7 @@ def test_legal_first_move():
 ...............
 ...............
 """
-    assert_code_and_message(str, 7, 7, 0, Gomoku.VALID_MOVE, None)
+    assert_code_and_message(str, 7, 7, 0, 0, 0, Gomoku.VALID_MOVE, None)
 
 def test_illegal_first_move():
     str = """\
@@ -56,7 +56,7 @@ def test_illegal_first_move():
 ...............
 ...............
 """
-    assert_code_and_message(str, 0, 0, 0, Gomoku.INVALID_MOVE, "First move must be in the center")
+    assert_code_and_message(str, 0, 0, 0, 0, 0, Gomoku.INVALID_MOVE, "First move must be in the center")
 
 def test_illegal_third_move_north():
     str = """\
@@ -76,7 +76,7 @@ def test_illegal_third_move_north():
 ...............
 ...............
 """
-    assert_code_and_message(str, 7, 5, 2, Gomoku.INVALID_MOVE, "Third move must be out of central 5×5 square")
+    assert_code_and_message(str, 7, 5, 0, 0,2, Gomoku.INVALID_MOVE, "Third move must be out of central 5×5 square")
 
 def test_illegal_third_move_south():
     str = """\
@@ -96,7 +96,7 @@ def test_illegal_third_move_south():
 ...............
 ...............
 """
-    assert_code_and_message(str, 7, 9, 2, Gomoku.INVALID_MOVE, "Third move must be out of central 5×5 square")
+    assert_code_and_message(str, 7, 9, 0, 0, 2, Gomoku.INVALID_MOVE, "Third move must be out of central 5×5 square")
     
 def test_illegal_third_move_west():
     str = """\
@@ -116,7 +116,7 @@ def test_illegal_third_move_west():
 ...............
 ...............
 """
-    assert_code_and_message(str, 5, 7, 2, Gomoku.INVALID_MOVE, "Third move must be out of central 5×5 square")
+    assert_code_and_message(str, 5, 7, 0, 0, 2, Gomoku.INVALID_MOVE, "Third move must be out of central 5×5 square")
 
 def test_illegal_third_move_east():
     str = """\
@@ -136,7 +136,7 @@ def test_illegal_third_move_east():
 ...............
 ...............
 """
-    assert_code_and_message(str, 9, 7, 2, Gomoku.INVALID_MOVE, "Third move must be out of central 5×5 square")
+    assert_code_and_message(str, 9, 7, 0, 0, 2, Gomoku.INVALID_MOVE, "Third move must be out of central 5×5 square")
 
 def test_legal_third_move():
     str = """\
@@ -156,7 +156,7 @@ def test_legal_third_move():
 ...............
 ...............
 """
-    assert_code_and_message(str, 4, 4, 2, Gomoku.VALID_MOVE, None)
+    assert_code_and_message(str, 4, 4, 0, 0, 2, Gomoku.VALID_MOVE, None)
 
 def test_move_out_of_go_ban():
     str = """\
@@ -176,7 +176,7 @@ def test_move_out_of_go_ban():
 ...............
 ...............
 """
-    assert_code_and_message(str, 16, 0, 0, Gomoku.INVALID_MOVE, "Move out of the go ban")
+    assert_code_and_message(str, 16, 0, 0, 0, 0, Gomoku.INVALID_MOVE, "Move out of the go ban")
 
 def test_move_on_occupied_cell():
     str = """\
@@ -196,7 +196,7 @@ def test_move_on_occupied_cell():
 ...............
 ...............
 """
-    assert_code_and_message(str, 3, 1, 4, Gomoku.INVALID_MOVE, "Move on an already played cell")
+    assert_code_and_message(str, 3, 1, 0, 0, 4, Gomoku.INVALID_MOVE, "Move on an already played cell")
 
 def test_detect_horizontal_black_win_top_right_corner():
     str = """\
@@ -216,7 +216,7 @@ def test_detect_horizontal_black_win_top_right_corner():
 ...............
 ...............
 """
-    assert_code_and_message(str, 1, 0, 8, Gomoku.WIN, "Player 1 wins (horizontal alignment)")
+    assert_code_and_message(str, 1, 0, 0, 0, 8, Gomoku.WIN, "Player 1 wins (horizontal alignment)")
 
 def test_detect_vertical_black_win_bottom_right_corner():
     str = """\
@@ -236,7 +236,7 @@ def test_detect_vertical_black_win_bottom_right_corner():
 .●.............
 .●.............
 """
-    assert_code_and_message(str, 1, 12, 8, Gomoku.WIN, "Player 1 wins (vertical alignment)")
+    assert_code_and_message(str, 1, 12, 0, 0, 8, Gomoku.WIN, "Player 1 wins (vertical alignment)")
 
 def test_detect_diagonal_black_win_bottom_left_corner():
     str = """\
@@ -256,7 +256,7 @@ def test_detect_diagonal_black_win_bottom_left_corner():
 ............●..
 ...............
 """
-    assert_code_and_message(str, 13, 14, 8, Gomoku.WIN, "Player 1 wins (diagonal alignment)")
+    assert_code_and_message(str, 13, 14, 0, 0, 8, Gomoku.WIN, "Player 1 wins (diagonal alignment)")
 
 def test_detect_anti_diagonal_black_win_bottom_left_corner():
     str = """\
@@ -276,7 +276,7 @@ def test_detect_anti_diagonal_black_win_bottom_left_corner():
 ...........●...
 ..........●....
 """
-    assert_code_and_message(str, 13, 11, 8, Gomoku.WIN, "Player 1 wins (anti-diagonal alignment)")
+    assert_code_and_message(str, 13, 11, 0, 0, 8, Gomoku.WIN, "Player 1 wins (anti-diagonal alignment)")
 
 
 def test_detect_horizontal_white_win_top_right_corner():
@@ -297,7 +297,7 @@ def test_detect_horizontal_white_win_top_right_corner():
 ...............
 ...............
 """
-    assert_code_and_message(str, 1, 0, 9, Gomoku.WIN, "Player -1 wins (horizontal alignment)")
+    assert_code_and_message(str, 1, 0, 0, 0, 9, Gomoku.WIN, "Player -1 wins (horizontal alignment)")
 
 def test_detect_vertical_white_win_bottom_right_corner():
     str = """\
@@ -317,7 +317,7 @@ def test_detect_vertical_white_win_bottom_right_corner():
 .○.............
 .○.............
 """
-    assert_code_and_message(str, 1, 12, 9, Gomoku.WIN, "Player -1 wins (vertical alignment)")
+    assert_code_and_message(str, 1, 12, 0, 0, 9, Gomoku.WIN, "Player -1 wins (vertical alignment)")
 
 def test_detect_diagonal_white_win_bottom_left_corner():
     str = """\
@@ -337,7 +337,7 @@ def test_detect_diagonal_white_win_bottom_left_corner():
 ............○..
 ...............
 """
-    assert_code_and_message(str, 13, 14, 9, Gomoku.WIN, "Player -1 wins (diagonal alignment)")
+    assert_code_and_message(str, 13, 14, 0, 0, 9, Gomoku.WIN, "Player -1 wins (diagonal alignment)")
 
 def test_detect_anti_diagonal_white_win_bottom_left_corner():
     str = """\
@@ -357,4 +357,54 @@ def test_detect_anti_diagonal_white_win_bottom_left_corner():
 ...........○...
 ..........○....
 """
-    assert_code_and_message(str, 13, 11, 9, Gomoku.WIN, "Player -1 wins (anti-diagonal alignment)")
+    assert_code_and_message(str, 13, 11, 0, 0, 9, Gomoku.WIN, "Player -1 wins (anti-diagonal alignment)")
+
+def test_detect_black_takes_three_takes():
+    str = """\
+●..●●●●........
+.○.○...........
+..○○...........
+●○○............
+...............
+...............
+...............
+...............
+...............
+...............
+...............
+...............
+...............
+...............
+...............
+"""
+    gomoku = Gomoku(15)
+    gomoku.set(convert_go_ban(str), 0, 0, 12)
+    result = gomoku.manage_move(3, 3)
+    assert result['status'] == Gomoku.VALID_MOVE
+    assert result['message'] == None
+    assert set(result['removed_stones']) == {(1, 1), (1, 3), (2, 2), (2, 3), (3, 1), (3, 2)}
+
+def test_detect_black_takes_two_takes_and_wins():
+    str = """\
+●..............
+...............
+●..............
+...............
+●..............
+...............
+●..............
+...............
+●..............
+...............
+●..............
+............○○●
+...........○●..
+...........○...
+...........●..●
+"""
+    gomoku = Gomoku(15)
+    gomoku.set(convert_go_ban(str), 3, 0, 20)
+    result = gomoku.manage_move(11, 11)
+    assert result['status'] == Gomoku.WIN
+    assert result['message'] == "Player 1 wins (5 takes)"
+    assert set(result['removed_stones']) == {(11, 12), (11, 13), (12, 11), (13, 11)}
