@@ -78,7 +78,6 @@ class Gomoku:
                 x_range_before += 1
             else:
                 break
-        print(f"x_range_before: {x_range_before}")
 
         x_range_after = 0
         for i in range(1, 5):
@@ -115,14 +114,12 @@ class Gomoku:
 
         xy_range_before = 0
         for i in range(-1, -5, -1):
-            print(f"i {i} self.board[{x+i}][{y+i}]= {self.board[x+i][y+i]}")
             if ((x+i) < 0) or ((y+i) < 0):
                 break
             if (self.board[x+i][y+i] == stone_owner):
                 xy_range_before += 1
             else:
                 break
-        print(f"xy_range_before: {xy_range_before}")
 
         xy_range_after = 0
         for i in range(1, 5):
@@ -132,7 +129,6 @@ class Gomoku:
                 xy_range_after += 1
             else:
                 break
-        print(f"xy_range_after: {xy_range_after}")
 
         if (xy_range_before + xy_range_after) >= 4:
             return { "status" : self.WIN, "message" : "Player " + str(stone_owner) + " wins (diagonal alignment)", "stone_removed" : [] }
