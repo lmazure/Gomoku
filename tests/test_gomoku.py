@@ -1,18 +1,10 @@
 from typing import Optional
 from gomoku import Gomoku
-
-def convert_go_ban(board: str) -> list[list[int]]:
-    # convert the go ban to a 2D array
-    # '.' -> 0
-    # '●' -> 1
-    # '○' -> -1
-    tempo = [[int(cell == '●') - int(cell == '○') for cell in line] for line in board.splitlines()]
-    return [list(i) for i in zip(*tempo)]
-
+from tests.helpers import convert_string_to_board
 
 def assert_code_and_message(board: str, x: int, y: int, black_takes: int, white_takes: int, turn_number: int, expected_status: int, expected_message: Optional[str]):
     gomoku = Gomoku(15)
-    gomoku.set(convert_go_ban(board), black_takes, white_takes, turn_number)
+    gomoku.set(convert_string_to_board(board), black_takes, white_takes, turn_number)
     result = gomoku.manage_move(x, y)
     assert result['status'] == expected_status
     assert result['message'] == expected_message
@@ -378,7 +370,7 @@ def test_detect_black_takes_three_takes():
 ...............
 """
     gomoku = Gomoku(15)
-    gomoku.set(convert_go_ban(str), 0, 0, 12)
+    gomoku.set(convert_string_to_board(str), 0, 0, 12)
     result = gomoku.manage_move(3, 3)
     assert result['status'] == Gomoku.VALID_MOVE
     assert result['message'] == None
@@ -403,7 +395,7 @@ def test_detect_black_takes_two_takes_and_wins():
 ...........●..●
 """
     gomoku = Gomoku(15)
-    gomoku.set(convert_go_ban(str), 3, 0, 20)
+    gomoku.set(convert_string_to_board(str), 3, 0, 20)
     result = gomoku.manage_move(11, 11)
     assert result['status'] == Gomoku.WIN
     assert result['message'] == "Player 1 wins (5 takes)"

@@ -66,7 +66,7 @@ class Gomoku:
             if (x != ((self.size-1)/2)) or (y != ((self.size-1)/2)):
                 return { "status" : self.INVALID_MOVE, "message" : "First move must be in the center", "removed_stones" : removed_stones }
         elif (self.turn_number == 2):
-            if (x >= ((self.size-5)/2)) and (y >= ((self.size-5)/2)) and (x <= ((self.size+5)/2)) and (y <= ((self.size+5)/2)):
+            if (x >= ((self.size-5)/2)) and (y >= ((self.size-5)/2)) and (x < ((self.size+5)/2)) and (y < ((self.size+5)/2)):
                 return { "status" : self.INVALID_MOVE, "message" : "Third move must be out of central 5×5 square", "removed_stones" : removed_stones }
         else:
             if (self.board[x][y] != 0):

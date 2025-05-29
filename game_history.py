@@ -10,7 +10,7 @@ class GameHistory:
 
     def record_move(self, x: int, y: int) -> Dict:
         result = self.last_frame.manage_move(x, y)
-        self.history.append(result['stone_changes'])
+        self.history.append((x, y, result['removed_stones']))
         return result
 
     def get_first_turn(self) -> Gomoku:
@@ -24,8 +24,8 @@ class GameHistory:
         assert turn_number <= len(self.history)
         game = self.first_frame.clone()
         for i in range(0, turn_number):
-            for (x,y) in self.history[i]['removed']:
-                game.board[x][y] = 0
-            for (x,y) in self.history[i]['added']:
-                game.board[x][y] = 1 - 2 * (turn_number % 2)
+            x, y, removed_stones = self.history[i]
+            game.board[x][y] = 1 - 2 * (i % 2)
+            for (xr, yr) in removed_stones:
+                game.board[xr][yr] = 0
         return game
