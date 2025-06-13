@@ -1,8 +1,8 @@
 from game_history import GameHistory
 from gomoku import Gomoku
-from tests.helpers import convert_board_to_string, convert_string_to_board
+from tests.helpers import convert_string_to_board
 
-def test_game_history():
+def test_full_game_history():
     turn_0 = """\
 ...............
 ...............
@@ -244,6 +244,7 @@ def test_game_history():
     assert result["status"] == Gomoku.WIN
     assert game_history.get_last_turn().board == convert_string_to_board(turn_11)
 
+    assert game_history.get_nth_turn(0).board == convert_string_to_board(turn_0)
     assert game_history.get_nth_turn(1).board == convert_string_to_board(turn_1)
     assert game_history.get_nth_turn(2).board == convert_string_to_board(turn_2)
     assert game_history.get_nth_turn(3).board == convert_string_to_board(turn_3)
@@ -255,3 +256,30 @@ def test_game_history():
     assert game_history.get_nth_turn(9).board == convert_string_to_board(turn_9)
     assert game_history.get_nth_turn(10).board == convert_string_to_board(turn_10)
     assert game_history.get_nth_turn(11).board == convert_string_to_board(turn_11)
+
+def test_illegal_first_move():
+    """Test when the first move is nt at the the center of the board.
+    """
+    game_history = GameHistory(15)
+    result = game_history.record_move(7, 6)
+    assert result["status"] == Gomoku.INVALID_MOVE
+
+def test_illegal_second_move():
+    """Test when the second move is on the same square as the first move.
+    """
+    game_history = GameHistory(15)
+    result = game_history.record_move(7, 7)
+    assert result["status"] == Gomoku.VALID_MOVE
+    result = game_history.record_move(7, 7)
+    assert result["status"] == Gomoku.INVALID_MOVE
+
+def test_illegal_third_move():
+    """Test when the third move is in the central region.
+    """
+    game_history = GameHistory(15)
+    result = game_history.record_move(7, 7)
+    assert result["status"] == Gomoku.VALID_MOVE
+    result = game_history.record_move(7, 8)
+    assert result["status"] == Gomoku.VALID_MOVE
+    result = game_history.record_move(7, 9)
+    assert result["status"] == Gomoku.INVALID_MOVE
