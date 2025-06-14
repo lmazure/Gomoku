@@ -245,17 +245,41 @@ def test_full_game_history():
     assert game_history.get_last_turn().board == convert_string_to_board(turn_11)
 
     assert game_history.get_nth_turn(0).board == convert_string_to_board(turn_0)
+    assert game_history.get_nth_turn(0).black_takes == 0
+    assert game_history.get_nth_turn(0).white_takes == 0
     assert game_history.get_nth_turn(1).board == convert_string_to_board(turn_1)
+    assert game_history.get_nth_turn(1).black_takes == 0
+    assert game_history.get_nth_turn(1).white_takes == 0
     assert game_history.get_nth_turn(2).board == convert_string_to_board(turn_2)
+    assert game_history.get_nth_turn(2).black_takes == 0
+    assert game_history.get_nth_turn(2).white_takes == 0
     assert game_history.get_nth_turn(3).board == convert_string_to_board(turn_3)
+    assert game_history.get_nth_turn(3).black_takes == 0
+    assert game_history.get_nth_turn(3).white_takes == 0
     assert game_history.get_nth_turn(4).board == convert_string_to_board(turn_4)
+    assert game_history.get_nth_turn(4).black_takes == 0
+    assert game_history.get_nth_turn(4).white_takes == 0
     assert game_history.get_nth_turn(5).board == convert_string_to_board(turn_5)
+    assert game_history.get_nth_turn(5).black_takes == 1
+    assert game_history.get_nth_turn(5).white_takes == 0
     assert game_history.get_nth_turn(6).board == convert_string_to_board(turn_6)
+    assert game_history.get_nth_turn(6).black_takes == 1
+    assert game_history.get_nth_turn(6).white_takes == 0
     assert game_history.get_nth_turn(7).board == convert_string_to_board(turn_7)
+    assert game_history.get_nth_turn(7).black_takes == 1
+    assert game_history.get_nth_turn(7).white_takes == 0
     assert game_history.get_nth_turn(8).board == convert_string_to_board(turn_8)
+    assert game_history.get_nth_turn(8).black_takes == 1
+    assert game_history.get_nth_turn(8).white_takes == 0
     assert game_history.get_nth_turn(9).board == convert_string_to_board(turn_9)
+    assert game_history.get_nth_turn(9).black_takes == 1
+    assert game_history.get_nth_turn(9).white_takes == 0
     assert game_history.get_nth_turn(10).board == convert_string_to_board(turn_10)
+    assert game_history.get_nth_turn(10).black_takes == 1
+    assert game_history.get_nth_turn(10).white_takes == 0
     assert game_history.get_nth_turn(11).board == convert_string_to_board(turn_11)
+    assert game_history.get_nth_turn(11).black_takes == 1
+    assert game_history.get_nth_turn(11).white_takes == 0
 
 def test_illegal_first_move():
     """Test when the first move is nt at the the center of the board.
