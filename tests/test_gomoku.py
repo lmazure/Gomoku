@@ -2,7 +2,7 @@ from typing import Optional
 from gomoku import Gomoku
 from tests.helpers import convert_string_to_board
 
-def assert_code_and_message(board: str, x: int, y: int, black_takes: int, white_takes: int, turn_number: int, expected_status: int, expected_message: Optional[str]):
+def assert_code_and_message(board: str, x: int, y: int, black_takes: int, white_takes: int, turn_number: int, expected_status: int, expected_message: Optional[str]) -> None:
     gomoku = Gomoku(15)
     gomoku.set(convert_string_to_board(board), black_takes, white_takes, turn_number)
     result = gomoku.manage_move(x, y)
@@ -30,7 +30,7 @@ def test_legal_first_move():
 """
     assert_code_and_message(str, 7, 7, 0, 0, 0, Gomoku.VALID_MOVE, None)
 
-def test_illegal_first_move():
+def test_illegal_first_move() -> None:
     str = """\
 ...............
 ...............
@@ -50,7 +50,7 @@ def test_illegal_first_move():
 """
     assert_code_and_message(str, 0, 0, 0, 0, 0, Gomoku.INVALID_MOVE, "First move must be in the center")
 
-def test_illegal_third_move_north():
+def test_illegal_third_move_north() -> None:
     str = """\
 ...............
 ...............
@@ -70,7 +70,7 @@ def test_illegal_third_move_north():
 """
     assert_code_and_message(str, 7, 5, 0, 0,2, Gomoku.INVALID_MOVE, "Third move must be out of central 5×5 square")
 
-def test_illegal_third_move_south():
+def test_illegal_third_move_south() -> None:
     str = """\
 ...............
 ...............
@@ -90,7 +90,7 @@ def test_illegal_third_move_south():
 """
     assert_code_and_message(str, 7, 9, 0, 0, 2, Gomoku.INVALID_MOVE, "Third move must be out of central 5×5 square")
     
-def test_illegal_third_move_west():
+def test_illegal_third_move_west() -> None:
     str = """\
 ...............
 ...............
@@ -110,7 +110,7 @@ def test_illegal_third_move_west():
 """
     assert_code_and_message(str, 5, 7, 0, 0, 2, Gomoku.INVALID_MOVE, "Third move must be out of central 5×5 square")
 
-def test_illegal_third_move_east():
+def test_illegal_third_move_east() -> None:
     str = """\
 ...............
 ...............
@@ -130,7 +130,7 @@ def test_illegal_third_move_east():
 """
     assert_code_and_message(str, 9, 7, 0, 0, 2, Gomoku.INVALID_MOVE, "Third move must be out of central 5×5 square")
 
-def test_legal_third_move():
+def test_legal_third_move() -> None:
     str = """\
 ...............
 ...............
@@ -150,7 +150,7 @@ def test_legal_third_move():
 """
     assert_code_and_message(str, 4, 4, 0, 0, 2, Gomoku.VALID_MOVE, None)
 
-def test_move_out_of_go_ban():
+def test_move_out_of_go_ban() -> None:
     str = """\
 ...............
 ...............
@@ -170,7 +170,7 @@ def test_move_out_of_go_ban():
 """
     assert_code_and_message(str, 16, 0, 0, 0, 0, Gomoku.INVALID_MOVE, "Move out of the go ban")
 
-def test_move_on_occupied_cell():
+def test_move_on_occupied_cell() -> None:
     str = """\
 ..............○
 ...●..........○
@@ -190,7 +190,7 @@ def test_move_on_occupied_cell():
 """
     assert_code_and_message(str, 3, 1, 0, 0, 4, Gomoku.INVALID_MOVE, "Move on an already played cell")
 
-def test_detect_horizontal_black_win_top_right_corner():
+def test_detect_horizontal_black_win_top_right_corner() -> None:
     str = """\
 ●.●●●..........
 ○..............
@@ -210,7 +210,7 @@ def test_detect_horizontal_black_win_top_right_corner():
 """
     assert_code_and_message(str, 1, 0, 0, 0, 8, Gomoku.WIN, "Player 1 wins (horizontal alignment)")
 
-def test_detect_vertical_black_win_bottom_right_corner():
+def test_detect_vertical_black_win_bottom_right_corner() -> None:
     str = """\
 ○○○○...........
 ...............
@@ -230,7 +230,7 @@ def test_detect_vertical_black_win_bottom_right_corner():
 """
     assert_code_and_message(str, 1, 12, 0, 0, 8, Gomoku.WIN, "Player 1 wins (vertical alignment)")
 
-def test_detect_diagonal_black_win_bottom_left_corner():
+def test_detect_diagonal_black_win_bottom_left_corner() -> None:
     str = """\
 ○○○○...........
 ...............
@@ -250,7 +250,7 @@ def test_detect_diagonal_black_win_bottom_left_corner():
 """
     assert_code_and_message(str, 13, 14, 0, 0, 8, Gomoku.WIN, "Player 1 wins (diagonal alignment)")
 
-def test_detect_anti_diagonal_black_win_bottom_left_corner():
+def test_detect_anti_diagonal_black_win_bottom_left_corner() -> None:
     str = """\
 ○○○○...........
 ...............
@@ -271,7 +271,7 @@ def test_detect_anti_diagonal_black_win_bottom_left_corner():
     assert_code_and_message(str, 13, 11, 0, 0, 8, Gomoku.WIN, "Player 1 wins (anti-diagonal alignment)")
 
 
-def test_detect_horizontal_white_win_top_right_corner():
+def test_detect_horizontal_white_win_top_right_corner() -> None:
     str = """\
 ○.○○○..........
 ●..............
@@ -291,7 +291,7 @@ def test_detect_horizontal_white_win_top_right_corner():
 """
     assert_code_and_message(str, 1, 0, 0, 0, 9, Gomoku.WIN, "Player -1 wins (horizontal alignment)")
 
-def test_detect_vertical_white_win_bottom_right_corner():
+def test_detect_vertical_white_win_bottom_right_corner() -> None:
     str = """\
 ●●●●...........
 ●..............
@@ -311,7 +311,7 @@ def test_detect_vertical_white_win_bottom_right_corner():
 """
     assert_code_and_message(str, 1, 12, 0, 0, 9, Gomoku.WIN, "Player -1 wins (vertical alignment)")
 
-def test_detect_diagonal_white_win_bottom_left_corner():
+def test_detect_diagonal_white_win_bottom_left_corner() -> None:
     str = """\
 ●●●●...........
 ●..............
@@ -331,7 +331,7 @@ def test_detect_diagonal_white_win_bottom_left_corner():
 """
     assert_code_and_message(str, 13, 14, 0, 0, 9, Gomoku.WIN, "Player -1 wins (diagonal alignment)")
 
-def test_detect_anti_diagonal_white_win_bottom_left_corner():
+def test_detect_anti_diagonal_white_win_bottom_left_corner() -> None:
     str = """\
 ●●●●...........
 ●..............
@@ -351,7 +351,7 @@ def test_detect_anti_diagonal_white_win_bottom_left_corner():
 """
     assert_code_and_message(str, 13, 11, 0, 0, 9, Gomoku.WIN, "Player -1 wins (anti-diagonal alignment)")
 
-def test_detect_black_takes_three_takes():
+def test_detect_black_takes_three_takes() -> None:
     str = """\
 ●..●●●●........
 .○.○...........
@@ -376,7 +376,7 @@ def test_detect_black_takes_three_takes():
     assert result['message'] == None
     assert set(result['removed_stones']) == {(1, 1), (1, 3), (2, 2), (2, 3), (3, 1), (3, 2)}
 
-def test_detect_black_takes_two_takes_and_wins():
+def test_detect_black_takes_two_takes_and_wins() -> None:
     str = """\
 ●..............
 ...............

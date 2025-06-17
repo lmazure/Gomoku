@@ -1,8 +1,9 @@
+from pathlib import Path
 from game_history import GameHistory
 from gomoku import Gomoku
 from tests.helpers import convert_string_to_board
 
-def test_full_game_history():
+def test_full_game_history() -> None:
     turn_0 = """\
 ...............
 ...............
@@ -281,14 +282,14 @@ def test_full_game_history():
     assert game_history.get_nth_turn(11).black_takes == 1
     assert game_history.get_nth_turn(11).white_takes == 0
 
-def test_illegal_first_move():
+def test_illegal_first_move() -> None:
     """Test when the first move is nt at the the center of the board.
     """
     game_history = GameHistory(15)
     result = game_history.record_move(7, 6)
     assert result["status"] == Gomoku.INVALID_MOVE
 
-def test_illegal_second_move():
+def test_illegal_second_move() -> None:
     """Test when the second move is on the same square as the first move.
     """
     game_history = GameHistory(15)
@@ -297,7 +298,7 @@ def test_illegal_second_move():
     result = game_history.record_move(7, 7)
     assert result["status"] == Gomoku.INVALID_MOVE
 
-def test_illegal_third_move():
+def test_illegal_third_move() -> None:
     """Test when the third move is in the central region.
     """
     game_history = GameHistory(15)
@@ -307,3 +308,33 @@ def test_illegal_third_move():
     assert result["status"] == Gomoku.VALID_MOVE
     result = game_history.record_move(7, 9)
     assert result["status"] == Gomoku.INVALID_MOVE
+
+def test_save_and_load_history(tmp_path: Path) -> None:
+    """
+    Tests saving the game history to a file and loading it back.
+    """
+    # 1. Create a GameHistory instance and record some moves
+    history = GameHistory(19)
+    history.record_move(9, 9)
+    history.record_move(10, 10)
+    history.record_move(8, 8)
+
+    # 2. Save the history to a file
+    file_path = tmp_path / "history.json"
+    history.save_to_file(str(file_path))
+
+    # 3. Load the history from the file
+    loaded_history = GameHistory.load_from_file(str(file_path))
+
+    # 4. Assert that the loaded history is identical to the original
+    assert loaded_history.first_frame.size == history.first_frame.size
+    assert loaded_history.history == history.history
+
+    # Check the state of the last frame
+    original_last_turn = history.get_last_turn()
+    loaded_last_turn = loaded_history.get_last_turn()
+
+    assert original_last_turn.board == loaded_last_turn.board
+    assert original_last_turn.turn_number == loaded_last_turn.turn_number
+    assert original_last_turn.black_takes == loaded_last_turn.black_takes
+    assert original_last_turn.white_takes == loaded_last_turn.white_takes
