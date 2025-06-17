@@ -8,6 +8,22 @@ class Gomoku:
     WIN = 2
 
     def __init__(self, size: int):
+        """
+        Initializes a Gomoku game board.
+
+        Args:
+            size (int): The size of the board. Must be an odd integer greater than or equal to 5.
+
+        Raises:
+            ValueError: If the size is less than 5 or not an odd integer.
+
+        Attributes:
+            board (list[list[int]]): A 2D list representing the board state.
+            size (int): The size of the board.
+            turn_number (int): The current turn number.
+            black_takes (int): The number of black stone pairs taken.
+            white_takes (int): The number of white stone pairs taken.
+        """
         if (size < 5):
             raise ValueError("Size must be at least 5")
         if ((size % 2) == 0):
@@ -19,7 +35,12 @@ class Gomoku:
         self.white_takes = 0
 
     def clone(self) -> 'Gomoku':
-        # return a clone of the board
+        """
+        Returns a clone of the board.
+
+        Returns:
+            Gomoku: A clone of the board.
+        """
 
         other = self.__class__(self.size)
         other.board = copy.deepcopy(self.board)
@@ -29,11 +50,18 @@ class Gomoku:
         return other
 
     def set(self, board: list[list[int]], black_takes: int, white_takes: int, turn_number: int):
-        # set the board to a given state
-        # board is a 2D array of size 15x15
-        # 0 -> empty cell
-        # 1 -> black stone
-        # -1 -> white stone
+        """
+        Sets the board to a given state.
+
+        Args:
+            board (list[list[int]]): The board to set.
+                 - 0 -> empty cell
+                 - 1 -> black stone
+                 - -1 -> white stone
+            black_takes (int): The number of black stone pairs taken.
+            white_takes (int): The number of white stone pairs taken.
+            turn_number (int): The turn number.
+        """
 
         # check board size
         assert len(board) == self.size
@@ -51,11 +79,22 @@ class Gomoku:
         self.white_takes = white_takes
 
     def manage_move(self, x: int, y: int) -> Dict:
-        # manage a move at position (x, y)
-        # return a dict (code, message, stone_changes)
-        # - code is an (integer) status code
-        # - message is a (string) explanation massage
-        # - removed_stones is a list of (int, int) tuples
+        """
+        Manages a move at position (x, y).
+
+        Args:
+            x (int): The x-coordinate of the move.
+            y (int): The y-coordinate of the move.
+
+        Returns:
+            Dict: The result of the move
+            - code is an (integer) status code
+                - VALID_MOVE = 0
+                - INVALID_MOVE = 1
+                - WIN = 2
+            - message is a (string) explanation message
+            - removed_stones is a list of (int, int) tuples
+        """
 
         removed_stones = []
 
