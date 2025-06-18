@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gomoku Replay</title>
+    <style>
+        body { font-family: sans-serif; display: flex; margin: 20px; background-color: #f4f4f4; color: #333; }
+        .left-panel { width: 60%; padding-right: 20px; border-right: 1px solid #ccc; }
+        .right-panel { width: 40%; padding-left: 20px; }
+        .board-container { margin-bottom: 20px; display: flex; justify-content: center; }
+        .board table { border-collapse: collapse; background-color: #deb887; box-shadow: 0 0 10px rgba(0,0,0,0.2); }
+        .board td {
+            width: 30px; height: 30px; 
+            border: 1px solid #555; 
+            text-align: center; vertical-align: middle;
+            position: relative;
+        }
+        /* Grid lines effect */
+        .board td::before, .board td::after {
+            content: '';
+            position: absolute;
+            background-color: #333;
+        }
+        .board td::before { /* Vertical line */
+            left: 50%; top: 0; bottom: 0; width: 1px; transform: translateX(-50%);
+        }
+        .board td::after { /* Horizontal line */
+            top: 50%; left: 0; right: 0; height: 1px; transform: translateY(-50%);
+        }
+        /* Hide outer lines for cleaner look */
+        .board tr:first-child td::after { display: none; }
+        .board tr:last-child td::after { display: none; }
+        .board tr td:first-child::before { display: none; }
+        .board tr td:last-child::before { display: none; }
+
+        .stone {
+            width: 26px; height: 26px; 
+            border-radius: 50%; 
+            display: inline-block; 
+            position: absolute; /* Centering stone on intersection */
+            left: 50%; top: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+        .black-stone { background-color: black; }
+        .white-stone { background-color: white; border: 1px solid #bbb; }
+        .last-move-highlight { background-color: lightgreen !important; opacity: 0.7; }
+        .controls { margin-bottom: 15px; text-align: center; background-color: #fff; padding: 10px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
+        .controls button { padding: 8px 15px; margin: 0 8px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s; }
+        .controls button:hover { background-color: #0056b3; }
+        .controls button:disabled { background-color: #ccc; cursor: not-allowed; }
+        .info { margin-bottom: 15px; text-align: center; background-color: #fff; padding: 10px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .move-list-container { background-color: #fff; padding: 15px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
+        .move-list { list-style-type: none; padding: 0; max-height: 450px; overflow-y: auto; border: 1px solid #ddd; }
+        .move-list li { padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s; }
+        .move-list li:hover { background-color: #f0f0f0; }
+        .move-list li.highlighted { background-color: #d1e7fd; font-weight: bold; }
+        .move-list li:nth-child(odd) { background-color: #f9f9f9; }
+        .move-list li.highlighted:nth-child(odd) { background-color: #cce0f5; }
+    </style>
+</head>
+<body>
+    <div class="left-panel">
+        <div class="controls">
+            <span id="turn-info">Turn: 0 / 0</span>
+            <button id="prev-turn">&lt; Prev</button>
+            <button id="next-turn">Next &gt;</button>
+        </div>
+        <div class="board-container">
+            <div id="board" class="board"></div>
+        </div>
+        <div class="info">
+            Black captures: <span id="black-captures">0</span> pairs<br>
+            White captures: <span id="white-captures">0</span> pairs
+        </div>
+    </div>
+    <div class="right-panel">
+        <div class="move-list-container">
+            <h3>Move History</h3>
+            <ul id="move-list" class="move-list"></ul>
+        </div>
+    </div>
+
+    <script id="game-data" type="application/json">
+        __GAME_DATA_PLACEHOLDER__
+    </script>
+
+    <script>
+        let gameData;
+        let currentTurnIndex = 0;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                const gameDataScript = document.getElementById('game-data');
+                if (!gameDataScript || !gameDataScript.textContent.trim() || gameDataScript.textContent.trim() === '__GAME_DATA_PLACEHOLDER__') {
+                    console.error("Game data script element not found, empty, or placeholder not replaced.");
+                    alert("Error: Game data not found or not replaced in HTML. Check console for details.");
+                    document.body.innerHTML = '<p style="color:red; text-align:center; margin-top: 50px;">Error: Game data placeholder was not replaced. Cannot display replay.</p>';
+                    return;
+                }
+                gameData = JSON.parse(gameDataScript.textContent);
+            } catch (e) {
+                console.error("Error parsing game data:", e);
+                alert("Error: Could not load game data. The JSON might be malformed. Check console for details.");
+                const gameDataContent = document.getElementById('game-data').textContent;
+                console.error("Problematic JSON content:", gameDataContent);
+                document.body.innerHTML = `<pre>Error parsing game data. Content was:\n${gameDataContent.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>`;
+                return;
+            }
+
+            if (!gameData || !gameData.turn_data || gameData.turn_data.length === 0) {
+                console.error("Game data is invalid or empty.");
+                document.getElementById('board').textContent = "No game data to display.";
+                return;
+            }
+
+            renderMoveList();
+            displayTurn(currentTurnIndex);
+
+            document.getElementById('prev-turn').addEventListener('click', () => {
+                if (currentTurnIndex > 0) {
+                    currentTurnIndex--;
+                    displayTurn(currentTurnIndex);
+                }
+            });
+
+            document.getElementById('next-turn').addEventListener('click', () => {
+                if (currentTurnIndex < gameData.turn_data.length - 1) {
+                    currentTurnIndex++;
+                    displayTurn(currentTurnIndex);
+                }
+            });
+        });
+
+        function displayTurn(turnIdx) {
+            currentTurnIndex = turnIdx;
+            const turn = gameData.turn_data[turnIdx];
+
+            document.getElementById('turn-info').textContent = `Turn: ${turn.turn_number} / ${gameData.total_turns}`;
+            renderBoard(turn.board, gameData.board_size, turn.last_move);
+            document.getElementById('black-captures').textContent = turn.black_captures;
+            document.getElementById('white-captures').textContent = turn.white_captures;
+
+            highlightMoveInList(turnIdx);
+            updateButtonStates();
+        }
+        
+        function updateButtonStates() {
+            document.getElementById('prev-turn').disabled = currentTurnIndex === 0;
+            document.getElementById('next-turn').disabled = currentTurnIndex >= gameData.turn_data.length - 1;
+        }
+
+        function renderBoard(boardData, size, lastMoveCoords) {
+            const boardDiv = document.getElementById('board');
+            boardDiv.innerHTML = ''; 
+            const table = document.createElement('table');
+
+            for (let i = 0; i < size; i++) {
+                const row = table.insertRow();
+                for (let j = 0; j < size; j++) {
+                    const cell = row.insertCell();
+                    const stoneType = boardData[i][j];
+                    if (stoneType === 1) { // Black stone
+                        const stoneDiv = document.createElement('div');
+                        stoneDiv.className = 'stone black-stone';
+                        cell.appendChild(stoneDiv);
+                    } else if (stoneType === -1) { // White stone
+                        const stoneDiv = document.createElement('div');
+                        stoneDiv.className = 'stone white-stone';
+                        cell.appendChild(stoneDiv);
+                    }
+                    if (lastMoveCoords && lastMoveCoords[0] === i && lastMoveCoords[1] === j) {
+                        cell.classList.add('last-move-highlight');
+                    }
+                }
+            }
+            boardDiv.appendChild(table);
+        }
+
+        function renderMoveList() {
+            const moveListUl = document.getElementById('move-list');
+            moveListUl.innerHTML = '';
+
+            const initialLi = document.createElement('li');
+            initialLi.textContent = `Turn 0: Initial Board`;
+            initialLi.dataset.turnIndex = 0;
+            initialLi.addEventListener('click', () => displayTurn(0));
+            moveListUl.appendChild(initialLi);
+
+            gameData.all_moves.forEach((move, index) => {
+                const turnNumber = index + 1;
+                const player = (index % 2 === 0) ? 'Black' : 'White';
+                const x = move[0];
+                const y = move[1];
+                const li = document.createElement('li');
+                li.textContent = `Turn ${turnNumber}: ${player} plays at (${x}, ${y})`;
+                li.dataset.turnIndex = turnNumber; 
+                li.addEventListener('click', () => displayTurn(turnNumber));
+                moveListUl.appendChild(li);
+            });
+        }
+
+        function highlightMoveInList(turnIdx) {
+            const moveListItems = document.querySelectorAll('#move-list li');
+            moveListItems.forEach(item => {
+                item.classList.remove('highlighted');
+                if (parseInt(item.dataset.turnIndex) === turnIdx) {
+                    item.classList.add('highlighted');
+                    item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            });
+        }
+    </script>
+</body>
+</html>

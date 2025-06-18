@@ -1,3 +1,4 @@
+import os
 from gomoku import Gomoku
 from random_player import RandomPlayer
 from game_history import GameHistory
@@ -23,6 +24,15 @@ class MatchManager:
             if result["status"] != Gomoku.VALID_MOVE:
                 break
 
+    def display_game(self):
+        # generate the name of the temporary file
+        temp_file_name = "gomoku_replay.html"
+        # generate the HTML replay
+        self.game_history.generate_html_replay(temp_file_name)
+        # open the HTML replay in the default browser
+        os.startfile(temp_file_name)
+
 if __name__ == "__main__":
     match_manager = MatchManager(15)
     match_manager.play()
+    match_manager.display_game()
