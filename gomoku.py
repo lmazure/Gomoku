@@ -19,6 +19,9 @@ class Gomoku:
 
         Attributes:
             board (list[list[int]]): A 2D list representing the board state.
+                - 0 -> empty cell
+                - 1 -> black stone
+                - -1 -> white stone
             size (int): The size of the board.
             turn_number (int): The current turn number.
             black_takes (int): The number of black stone pairs taken.
@@ -28,11 +31,11 @@ class Gomoku:
             raise ValueError("Size must be at least 5")
         if ((size % 2) == 0):
             raise ValueError("Size must be odd")
-        self.board = [[0 for _ in range(size)] for _ in range(size)]
-        self.size = size
-        self.turn_number = 0
-        self.black_takes = 0
-        self.white_takes = 0
+        self.board:list[list[int]] = [[0 for _ in range(size)] for _ in range(size)]
+        self.size:int = size
+        self.turn_number:int = 0
+        self.black_takes:int = 0
+        self.white_takes:int = 0
 
     def clone(self) -> 'Gomoku':
         """
@@ -55,9 +58,9 @@ class Gomoku:
 
         Args:
             board (list[list[int]]): The board to set.
-                 - 0 -> empty cell
-                 - 1 -> black stone
-                 - -1 -> white stone
+                - 0 -> empty cell
+                - 1 -> black stone
+                - -1 -> white stone
             black_takes (int): The number of black stone pairs taken.
             white_takes (int): The number of white stone pairs taken.
             turn_number (int): The turn number.
@@ -172,11 +175,11 @@ class Gomoku:
                 self.board[x-1][y+1] = 0
 
         if (stone_owner == 1):
-            self.black_takes += len(removed_stones) / 2
+            self.black_takes += len(removed_stones) // 2
             if (self.black_takes >= 5):
                 return { "status" : self.WIN, "message" : "Player 1 wins (5 takes)", "removed_stones" : removed_stones }
         else:
-            self.white_takes += len(removed_stones) / 2
+            self.white_takes += len(removed_stones) // 2
             if (self.white_takes >= 5):
                 return { "status" : self.WIN, "message" : "Player 2 wins (5 takes)", "removed_stones" : removed_stones }
 

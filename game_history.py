@@ -70,10 +70,10 @@ class GameHistory:
             x, y, removed_stones = self.history[i]
             if (i % 2):
                 game.board[x][y] = -1
-                game.white_takes += len(removed_stones) / 2
+                game.white_takes += len(removed_stones) // 2
             else:
                 game.board[x][y] = 1
-                game.black_takes += len(removed_stones) / 2
+                game.black_takes += len(removed_stones) // 2
             for (xr, yr) in removed_stones:
                 game.board[xr][yr] = 0
         return game
