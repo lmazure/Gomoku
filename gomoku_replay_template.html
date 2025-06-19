@@ -7,10 +7,10 @@
         .left-panel { width: 60%; padding-right: 20px; border-right: 1px solid #ccc; }
         .right-panel { width: 40%; padding-left: 20px; }
         .board-container { margin-bottom: 20px; display: flex; justify-content: center; }
-        .board table { border-collapse: collapse; background-color: #deb887; box-shadow: 0 0 10px rgba(0,0,0,0.2); }
+        .board table { border-collapse: collapse; border: none; background-color: #deb887; box-shadow: 0 0 10px rgba(0,0,0,0.2); }
         .board td {
             width: 30px; height: 30px; 
-            border: 1px solid #555; 
+            border: none; 
             text-align: center; vertical-align: middle;
             position: relative;
         }
@@ -26,11 +26,6 @@
         .board td::after { /* Horizontal line */
             top: 50%; left: 0; right: 0; height: 1px; transform: translateY(-50%);
         }
-        /* Hide outer lines for cleaner look */
-        .board tr:first-child td::after { display: none; }
-        .board tr:last-child td::after { display: none; }
-        .board tr td:first-child::before { display: none; }
-        .board tr td:last-child::before { display: none; }
 
         .stone {
             width: 26px; height: 26px; 
@@ -40,6 +35,7 @@
             left: 50%; top: 50%;
             transform: translate(-50%, -50%);
             box-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+            z-index: 1;
         }
         .black-stone { background-color: black; }
         .white-stone { background-color: white; border: 1px solid #bbb; }
